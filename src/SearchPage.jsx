@@ -1,54 +1,9 @@
 import React from 'react';
 import TitleLogo from './components/TitleLogo.jsx';
 import SearchForm from './components/SearchForm.jsx';
+import TrendingBar from './components/TrendingBar.jsx';
 
 // This is a place holder for the initial application state.
-
-class TrendingCard extends React.Component {
-  render() {
-    const item = this.props.item;
-    const yturl = 'https://youtube.com/watch?v=' + item.ytId;
-    const ytimg = 'http://i3.ytimg.com/vi/' + item.ytId + '/hqdefault.jpg';
-    return (
-      <div className="col" style={{width: "33%"}}>
-        <div className="card card-body">
-          <div className="card">
-            <img src={ytimg} className="card-img-top" alt="..."></img>
-            <div className="card-body">
-              <h5 className="card-title">{item.title}</h5>
-              <p className="card-text">Very Popular with {item.upvotes} likes!</p>
-              <a href={yturl} className="btn btn-primary">Go to the Youtube page</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
-
-class TrendingCardProt extends React.Component {
-  render() {
-    const trendingCards = this.props.trendingData.map(item => (
-      <TrendingCard key={item.ytId} item={item} />
-    ));
-    return (
-      <div className="row">
-        <div className="col">
-          <p>
-            <a className="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-              <h2>See Popular Sites</h2>
-            </a>
-          </p>
-          <div className="collapse" id="collapseExample">
-            <div className="row" style={{width: "95%"}}>
-              {trendingCards}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
 
 export default class SearchPage extends React.Component {
   constructor(props) {
@@ -88,7 +43,7 @@ export default class SearchPage extends React.Component {
 
   render() {
     let loadingTrending = <h1>......Loading......</h1>
-    let trendingBar = (this.state.trendingData != null) ? <TrendingCardProt trendingData={this.state.trendingData} /> : loadingTrending
+    let trendingBar = (this.state.trendingData != null) ? <TrendingBar trendingData={this.state.trendingData} /> : loadingTrending
     return (
       <div>
           <TitleLogo />
