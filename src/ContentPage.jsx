@@ -41,10 +41,10 @@ class AddVideoForm extends React.Component {
         <Selection key={section.index} section={section} />
       ))
     };
-    this.handleAddVidoe = this.handleAddVidoe.bind(this);
+    this.handleAddVideo = this.handleAddVideo.bind(this);
   }
 
-  handleAddVidoe(e) {
+  handleAddVideo(e) {
     e.preventDefault();
     let form = document.forms.videoAdd;
     const submitReq = {
@@ -75,7 +75,7 @@ class AddVideoForm extends React.Component {
   render() {
     return (
       <div>
-        <form name="videoAdd" onSubmit={this.handleAddVidoe}>
+        <form name="videoAdd" onSubmit={this.handleAddVideo}>
           <div className="form-group">
             <label htmlFor="videoID">Youtube Video ID</label>
             <input type="text" className="form-control" id="videoID" placeholder="The 11 Digit code after watch?v="></input>
