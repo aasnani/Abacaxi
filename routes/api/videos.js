@@ -66,6 +66,20 @@ const sortVideos = (videos,applyFilter) => {
   return sortedVideos;
 }
 
+const getSectionIds = (videos) => {
+  let sectionIDSet = new Set();
+  videos.forEach(video => {
+    sectionIDSet.add(video["sectionIdx"]);
+  })
+  return Array.from(sectionIDSet);
+}
+
+const compareVideos = (v1,v2) => {
+  let v1Score = v1["upvotes"] - v1["downvotes"];
+  let v2Score = v2["upvotes"] - v2["downvotes"];
+  return v1Score - v2Score;
+}
+
 // const reconstructVideo = (dbVideo) => {
 //   let reconstructedVideo = {
 //     wikiPageId: dbVideo.wikiPageId,
