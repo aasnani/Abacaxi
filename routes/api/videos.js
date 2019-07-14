@@ -8,7 +8,7 @@ const fetch = require('node-fetch'); //fetch API module for node.js(apparently d
 //Video Model
 const Video = require("../../models/Video");
 
-router.get("/:id", (req, res) => {
+router.get('/:id', (req, res) => {
   let wikiId = parseInt(req.params.id, 10);
   let videoArray = [];
   Video.countDocuments({
@@ -54,7 +54,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.post('/', (req, res) => {
   let newVideo = req.body.video;
 
   Video.find({
@@ -62,7 +62,6 @@ router.post("/", (req, res) => {
     sectionIdx: newVideo.sectionIdx,
     ytId: newVideo.ytId
   }).countDocuments().then(async (count) => {
-    console.log(count);
     if (count == 0) {
       let videoTitle = await fetchTitle(newVideo.ytId);
       let videoToBeInserted = new Video({
@@ -78,7 +77,9 @@ router.post("/", (req, res) => {
           video: reconstructVideo(video)
         }))
       })
-    } else res.json(constructResponse(false, "This video for this specific page, topic and subsection already exists!", {video:{}}));
+    } else res.json(constructResponse(false, "This video for this specific page, topic and subsection already exists!", {
+      video: {}
+    }));
 
   }).catch(err => {
     console.log(`Error in adding video with ID: ${newVideo.ytId} and wikipage ID: ${newVideo.wikiPageId}: ${err}`);
@@ -87,6 +88,52 @@ router.post("/", (req, res) => {
     }));
   });
 
+});
+
+router.put('/', (req, res) => {
+  let videoToUpdate = req.body.video;
+  let field; //field to update
+  let operation; //which operation, upvote or downvote to perform
+  let value;
+
+  let hasUpvote = videoToUpdate.hasOwnProperty("upvote");
+  let hasDownvote = videoToUpdate.hasOwnProperty("downvote");
+
+  if ((hasUpvote && hasDownvote) || (!hasUpvote && !hasDownvote)) {
+    res.json(constructResponse(false, "Error: Request body is either missing property upvote/downvote or has both")); //enforcing property constraints
+    return;
+  }
+  if (hasUpvote) {
+    field = "upvotes"; //check the object for the property, use it to decide the action
+    operation = "upvote";
+  } else if (hasDownvote) {
+    field = "downvotes";
+    operation = "downvote";
+  }
+
+  if (videoToUpdate[operation]) value = 1; //if the operation property in the video object is true, we increment, else decrement
+  else value = -1;
+
+  Video.updateOne({
+    wikiPageId: videoToUpdate.wikiPageId,
+    sectionIdx: videoToUpdate.sectionIdx,
+    ytId: videoToUpdate.ytId
+  }, {
+    $inc: {
+      [field]: value
+    }
+  }).then(result => {
+    Video.findOne({
+      wikiPageId: videoToUpdate.wikiPageId,
+      sectionIdx: videoToUpdate.sectionIdx,
+      ytId: videoToUpdate.ytId
+    }).then(updatedVideo => {
+      res.json(constructResponse(true, "Video successfully upvoted/downvoted!", {video: reconstructVideo(updatedVideo)}));
+    })
+  }).catch(err => {
+    console.log(`Error in parsing PUT request to /api/videos/update with video youtube id ${videoToUpdate.ytId} and wikipage id ${videoToUpdate.wikiPageId}: ${error}`);
+    res.json(constructResponse(false, `There was an error updating the video upvote/downvote count! Sorry!`, {video: {}}));
+  })
 })
 
 const constructResponse = (success, message, optionals) => {
@@ -117,6 +164,21 @@ const convertDocArrayToVideoArray = docsarray => {
 
 const sortVideos = (videos, applyFilter) => {
   let sortedVideos = [];
+
+  const getSectionIds = videos => {
+    let sectionIDSet = new Set();
+    videos.forEach(video => {
+      sectionIDSet.add(video["sectionIdx"]);
+    });
+    return Array.from(sectionIDSet);
+  };
+
+  const compareVideos = (v1, v2) => {
+    let v1Score = v1["upvotes"] - v1["downvotes"];
+    let v2Score = v2["upvotes"] - v2["downvotes"];
+    return v1Score - v2Score;
+  };
+
   if (applyFilter) {
     let sectionIDList = getSectionIds(videos);
     sectionIDList.forEach(sectionID => {
@@ -133,20 +195,6 @@ const sortVideos = (videos, applyFilter) => {
     .slice(0, 3);
 
   return sortedVideos;
-};
-
-const getSectionIds = videos => {
-  let sectionIDSet = new Set();
-  videos.forEach(video => {
-    sectionIDSet.add(video["sectionIdx"]);
-  });
-  return Array.from(sectionIDSet);
-};
-
-const compareVideos = (v1, v2) => {
-  let v1Score = v1["upvotes"] - v1["downvotes"];
-  let v2Score = v2["upvotes"] - v2["downvotes"];
-  return v1Score - v2Score;
 };
 
 const reconstructVideo = (dbVideo) => {
