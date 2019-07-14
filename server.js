@@ -1,5 +1,4 @@
 const express = require('express');
-const MongoClient = require('mongodb').MongoClient;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch'); //fetch API module for node.js(apparently doesn't automatically support it?)

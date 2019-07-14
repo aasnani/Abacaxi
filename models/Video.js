@@ -27,6 +27,10 @@ const videoSchema = new Schema({
     wikiPageId: {
         type: Number,
         required: true
+    },
+    ytId: {
+        type: String,
+        required: true
     }
 });
 
