@@ -7,6 +7,7 @@ const URLSearchParams = url.URLSearchParams;
 const URL = url.URL;
 
 const videos = require('./routes/api/videos');
+const trendingvideos = require('./routes/api/trendingvideos');
 
 const app = express();
 
@@ -54,25 +55,27 @@ app.use("/api/videos", videos);
 
 //GET TRENDING VIDEOS ENDPOINT
 
-app.get('/api/trending', (req,res) => {
-  db.collection('videos').find().count()
-  .then(count =>{
-    if(count == 0) {
-      res.json(constructResponse(true,`There are no trending videos!`, {videos: [], count:count}));
-      return;
-    }
-    db.collection('videos').find().toArray()
-    .then(allVideos => {
-      let reconstructedVideos = [];
-      allVideos.forEach(video => reconstructedVideos.push(reconstructVideo(video)));
-      let sortedVideos = sortVideos(reconstructedVideos,false);
-      res.json(constructResponse(true,`Successfully found top 3 trending videos!`, {videos: sortedVideos, count: sortedVideos.length}));
-    })
-  }).catch(error =>{
-    console.log(`Error in parsing GET request to /api/videos/trending: ${error}`);
-    res.json(constructResponse(false, `There was an error with retrieving the trending videos. Sorry!`, {videos: [], count: -1}));
-  });
-});
+app.use('/api/trending', trendingvideos);
+
+// app.get('/api/trending', (req,res) => {
+//   db.collection('videos').find().count()
+//   .then(count =>{
+//     if(count == 0) {
+//       res.json(constructResponse(true,`There are no trending videos!`, {videos: [], count:count}));
+//       return;
+//     }
+//     db.collection('videos').find().toArray()
+//     .then(allVideos => {
+//       let reconstructedVideos = [];
+//       allVideos.forEach(video => reconstructedVideos.push(reconstructVideo(video)));
+//       let sortedVideos = sortVideos(reconstructedVideos,false);
+//       res.json(constructResponse(true,`Successfully found top 3 trending videos!`, {videos: sortedVideos, count: sortedVideos.length}));
+//     })
+//   }).catch(error =>{
+//     console.log(`Error in parsing GET request to /api/videos/trending: ${error}`);
+//     res.json(constructResponse(false, `There was an error with retrieving the trending videos. Sorry!`, {videos: [], count: -1}));
+//   });
+// });
 
 //CREATE VIDEO ENDPOINT
 // app.post('/api/videos', (req,res) => {
