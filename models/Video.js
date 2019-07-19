@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const videoModel = mongoose.model("video",videoSchema);
 
-module.exports = videoModel;
 
 const videoSchema = new Schema({
     title: {
@@ -29,5 +27,13 @@ const videoSchema = new Schema({
     wikiPageId: {
         type: Number,
         required: true
+    },
+    ytId: {
+        type: String,
+        required: true
     }
 });
+
+const Video = mongoose.model("video",videoSchema, "videos");
+
+module.exports = Video;
